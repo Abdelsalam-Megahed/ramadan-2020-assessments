@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             data.forEach((videoRequest) => {
-                // const video = getSingleVideoRequest(videoRequest);
                 listOfVideoRequests.appendChild(getSingleVideoRequest(videoRequest));
             })
         });
@@ -18,11 +17,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
       fetch('http://localhost:7777/video-request', {
           method: 'POST',
-          // body: JSON.stringify(formData) 
           body: formData 
       })
-      .then(function (response) {
-          return response.json();
+      .then((response) => response.json())
+      .then((requestVideo) => {
+         listOfVideoRequests.prepend(getSingleVideoRequest(requestVideo));
       })
     })
 })
@@ -36,7 +35,10 @@ function getSingleVideoRequest(videoRequest) {
             <h3>${videoRequest.topic_title}</h3>
             <p class="text-muted mb-2">${videoRequest.topic_details}</p>
             <p class="mb-0 text-muted">
-            <strong>Expected results:</strong> ${videoRequest.expected_result} 
+          ${
+              videoRequest.expected_result &&  
+              `<strong>Expected results:</strong> ${videoRequest.expected_result}` 
+            }
             </p>
         </div>
         <div class="d-flex flex-column text-center">
