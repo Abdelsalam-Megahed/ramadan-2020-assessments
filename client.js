@@ -1,13 +1,37 @@
+function loadAllVideoRequests(sortBy = 'newFirst'){
+    fetch(`http://localhost:7777/video-request?sortBy=${sortBy}`)
+    .then(response => response.json())
+    .then(data => {
+        data.forEach((videoRequest) => {
+            renderSingleVideoRequest(videoRequest);
+        })
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const formVideoRequest = document.querySelector('#formVideoRequest');
+    const sortByElements = document.querySelectorAll('[id*=sort_by_]');
 //GET
-    fetch('http://localhost:7777/video-request')
-        .then(response => response.json())
-        .then(data => {
-            data.forEach((videoRequest) => {
-                renderSingleVideoRequest(videoRequest);
-            })
-        });
+loadAllVideoRequests();
+
+//SortBY
+    sortByElements.forEach(element => {
+        element.addEventListener('click', function(event){
+            event.preventDefault();
+
+            const sortBy = this.querySelector('input');
+            listOfVideoRequests.innerHTML='';
+            loadAllVideoRequests(sortBy.value);
+
+            if(sortBy.value === 'topVotedFrst'){
+                document.getElementById('sort_by_top').classList.add('active');
+                document.getElementById('sort_by_new').classList.remove('active');
+            }else{
+                document.getElementById('sort_by_top').classList.remove('active');
+                document.getElementById('sort_by_new').classList.add('active');
+            }
+        })
+    })
 
 //POST
     formVideoRequest.addEventListener('submit', function(event){
