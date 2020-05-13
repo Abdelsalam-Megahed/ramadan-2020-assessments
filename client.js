@@ -2,7 +2,7 @@ const listOfVideoRequests = document.querySelector('#listOfRequests');
 let sortBy = 'newFirst';
 let searchTerm = '';
 
-function loadAllVideoRequests(sortBy = 'newFirst', searchTerm = ' '){
+function loadAllVideoRequests(sortBy = 'newFirst', searchTerm = ''){
     fetch(`http://localhost:7777/video-request?sortBy=${sortBy}&searchTerm=${searchTerm}`)
     .then(response => response.json())
     .then(data => {
@@ -16,15 +16,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const formVideoRequest = document.querySelector('#formVideoRequest');
     const sortByElements = document.querySelectorAll('[id*=sort_by_]');
     const searchBox = document.querySelector('#search-box');
-    
-    searchBox.addEventListener('input', (event) => {
+//GET
+    loadAllVideoRequests();
+
+//Search   
+    searchBox.addEventListener('input', debounce((event) => {
         console.log(event.target.value);
         searchTerm = event.target.value;
         listOfVideoRequests.innerHTML='';
         loadAllVideoRequests(sortBy, searchTerm);
-    })
-//GET
-loadAllVideoRequests();
+    },1000)
+   );
 
 //SortBY
     sortByElements.forEach(element => {
@@ -61,6 +63,15 @@ loadAllVideoRequests();
     })
 })
 ////////////////////////////////////////////
+function debounce(fun, delay){
+    let timeout;
+
+    return function(...args){
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fun.apply(this, args), delay);
+    }
+}
+
 function renderSingleVideoRequest(videoRequest, isAppend = false) {
     const videoRequestContainer = document.createElement('div');
     videoRequestContainer.innerHTML = `
