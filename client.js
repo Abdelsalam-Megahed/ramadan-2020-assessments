@@ -1,42 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
     const formVideoRequest = document.querySelector('#formVideoRequest');
-    const listOfVideoRequests = document.querySelector('#listOfRequests');
- 
-
+//GET
     fetch('http://localhost:7777/video-request')
         .then(response => response.json())
         .then(data => {
             data.forEach((videoRequest) => {
-                listOfVideoRequests.appendChild(getSingleVideoRequest(videoRequest));
-
-                const voteUpElement = document.querySelector(`#votes_ups_${videoRequest._id}`);
-                const voteDownElement = document.querySelector(`#votes_downs_${videoRequest._id}`);
-                const scoreVote = document.querySelector(`#score_vote_${videoRequest._id}`);
-
-                voteUpElement.addEventListener('click', (event) => {
-                    console.log(event);
-                    fetch('http://localhost:7777/video-request/vote', {
-                        method: 'PUT',
-                        headers: {'content-Type': 'application/json'},
-                        body: JSON.stringify({id: videoRequest._id, vote_type: 'ups'})
-                    })
-                    .then(res => res.json())
-                    .then(data=> scoreVote.innerHTML = data.ups - data.downs);
-                });
-
-                voteDownElement.addEventListener('click', (event) => {
-                    console.log(event);
-                    fetch('http://localhost:7777/video-request/vote', {
-                        method: 'PUT',
-                        headers: {'content-Type': 'application/json'},
-                        body: JSON.stringify({id: videoRequest._id, vote_type: 'downs'})
-                    })
-                    .then(res => res.json())
-                    .then(data=> scoreVote.innerHTML = data.ups - data.downs);
-                });
+                renderSingleVideoRequest(videoRequest);
             })
         });
 
+//POST
     formVideoRequest.addEventListener('submit', function(event){
       event.preventDefault();
       const formData = new FormData(this);
@@ -46,13 +19,15 @@ document.addEventListener('DOMContentLoaded', function () {
           body: formData 
       })
       .then((response) => response.json())
-      .then((requestVideo) => {
-        return listOfVideoRequests.prepend(getSingleVideoRequest(requestVideo));
+      .then((videoRequest) => {
+         renderSingleVideoRequest(videoRequest, true);
       })
     })
 })
+////////////////////////////
+const listOfVideoRequests = document.querySelector('#listOfRequests');
 
-function getSingleVideoRequest(videoRequest) {
+function renderSingleVideoRequest(videoRequest, isAppend = false) {
     const videoRequestContainer = document.createElement('div');
     videoRequestContainer.innerHTML = `
         <div class="card mb-3">
@@ -90,7 +65,37 @@ function getSingleVideoRequest(videoRequest) {
         </div>
     `;
 
-    return videoRequestContainer;
+    if(!isAppend){
+        listOfVideoRequests.appendChild(videoRequestContainer);
+    }else{
+        listOfVideoRequests.prepend(videoRequestContainer);
+    }
+
+    const voteUpElement = document.querySelector(`#votes_ups_${videoRequest._id}`);
+    const voteDownElement = document.querySelector(`#votes_downs_${videoRequest._id}`);
+    const scoreVote = document.querySelector(`#score_vote_${videoRequest._id}`);
+
+    voteUpElement.addEventListener('click', (event) => {
+        console.log(event);
+        fetch('http://localhost:7777/video-request/vote', {
+            method: 'PUT',
+            headers: {'content-Type': 'application/json'},
+            body: JSON.stringify({id: videoRequest._id, vote_type: 'ups'})
+        })
+        .then(res => res.json())
+        .then(data => scoreVote.innerHTML = data.ups - data.downs);
+    });
+
+    voteDownElement.addEventListener('click', (event) => {
+        console.log(event);
+        fetch('http://localhost:7777/video-request/vote', {
+            method: 'PUT',
+            headers: {'content-Type': 'application/json'},
+            body: JSON.stringify({id: videoRequest._id, vote_type: 'downs'})
+        })
+        .then(res => res.json())
+        .then(data=> scoreVote.innerHTML = data.ups - data.downs);
+    });
 }
 
     
