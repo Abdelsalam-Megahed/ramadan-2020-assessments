@@ -1,13 +1,39 @@
 document.addEventListener('DOMContentLoaded', function () {
     const formVideoRequest = document.querySelector('#formVideoRequest');
     const listOfVideoRequests = document.querySelector('#listOfRequests');
-   
+ 
 
     fetch('http://localhost:7777/video-request')
         .then(response => response.json())
         .then(data => {
             data.forEach((videoRequest) => {
                 listOfVideoRequests.appendChild(getSingleVideoRequest(videoRequest));
+
+                const voteUpElement = document.querySelector(`#votes_ups_${videoRequest._id}`);
+                const voteDownElement = document.querySelector(`#votes_downs_${videoRequest._id}`);
+                const scoreVote = document.querySelector(`#score_vote_${videoRequest._id}`);
+
+                voteUpElement.addEventListener('click', (event) => {
+                    console.log(event);
+                    fetch('http://localhost:7777/video-request/vote', {
+                        method: 'PUT',
+                        headers: {'content-Type': 'application/json'},
+                        body: JSON.stringify({id: videoRequest._id, vote_type: 'ups'})
+                    })
+                    .then(res => res.json())
+                    .then(data=> scoreVote.innerHTML = data.ups - data.downs);
+                });
+
+                voteDownElement.addEventListener('click', (event) => {
+                    console.log(event);
+                    fetch('http://localhost:7777/video-request/vote', {
+                        method: 'PUT',
+                        headers: {'content-Type': 'application/json'},
+                        body: JSON.stringify({id: videoRequest._id, vote_type: 'downs'})
+                    })
+                    .then(res => res.json())
+                    .then(data=> scoreVote.innerHTML = data.ups - data.downs);
+                });
             })
         });
 
@@ -21,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .then((response) => response.json())
       .then((requestVideo) => {
-         listOfVideoRequests.prepend(getSingleVideoRequest(requestVideo));
+        return listOfVideoRequests.prepend(getSingleVideoRequest(requestVideo));
       })
     })
 })
@@ -42,9 +68,9 @@ function getSingleVideoRequest(videoRequest) {
             </p>
         </div>
         <div class="d-flex flex-column text-center">
-            <a class="btn btn-link">🔺</a>
-            <h3>0</h3>
-            <a class="btn btn-link">🔻</a>
+            <a id="votes_ups_${videoRequest._id}" class="btn btn-link">🔺</a>
+            <h3 id="score_vote_${videoRequest._id}">${videoRequest.votes.ups - videoRequest.votes.downs}</h3>
+            <a id="votes_downs_${videoRequest._id}" class="btn btn-link">🔻</a>
         </div>
         </div>
         <div class="card-footer d-flex flex-row justify-content-between">
