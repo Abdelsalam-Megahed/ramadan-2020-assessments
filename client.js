@@ -1,5 +1,9 @@
-function loadAllVideoRequests(sortBy = 'newFirst'){
-    fetch(`http://localhost:7777/video-request?sortBy=${sortBy}`)
+const listOfVideoRequests = document.querySelector('#listOfRequests');
+let sortBy = 'newFirst';
+let searchTerm = '';
+
+function loadAllVideoRequests(sortBy = 'newFirst', searchTerm = ' '){
+    fetch(`http://localhost:7777/video-request?sortBy=${sortBy}&searchTerm=${searchTerm}`)
     .then(response => response.json())
     .then(data => {
         data.forEach((videoRequest) => {
@@ -11,6 +15,14 @@ function loadAllVideoRequests(sortBy = 'newFirst'){
 document.addEventListener('DOMContentLoaded', function () {
     const formVideoRequest = document.querySelector('#formVideoRequest');
     const sortByElements = document.querySelectorAll('[id*=sort_by_]');
+    const searchBox = document.querySelector('#search-box');
+    
+    searchBox.addEventListener('input', (event) => {
+        console.log(event.target.value);
+        searchTerm = event.target.value;
+        listOfVideoRequests.innerHTML='';
+        loadAllVideoRequests(sortBy, searchTerm);
+    })
 //GET
 loadAllVideoRequests();
 
@@ -19,11 +31,11 @@ loadAllVideoRequests();
         element.addEventListener('click', function(event){
             event.preventDefault();
 
-            const sortBy = this.querySelector('input');
+            sortBy = this.querySelector('input').value;
             listOfVideoRequests.innerHTML='';
-            loadAllVideoRequests(sortBy.value);
+            loadAllVideoRequests(sortBy, searchTerm);
 
-            if(sortBy.value === 'topVotedFrst'){
+            if(sortBy === 'topVotedFrst'){
                 document.getElementById('sort_by_top').classList.add('active');
                 document.getElementById('sort_by_new').classList.remove('active');
             }else{
@@ -49,8 +61,6 @@ loadAllVideoRequests();
     })
 })
 ////////////////////////////////////////////
-const listOfVideoRequests = document.querySelector('#listOfRequests');
-
 function renderSingleVideoRequest(videoRequest, isAppend = false) {
     const videoRequestContainer = document.createElement('div');
     videoRequestContainer.innerHTML = `
